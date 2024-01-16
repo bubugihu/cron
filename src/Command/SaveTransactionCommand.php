@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Library\Business\Cron;
 use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Log\Log;
 
 /**
  * SaveTransaction command.
@@ -36,5 +38,7 @@ class SaveTransactionCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
+        $cron = new Cron();
+        $cron->saveTransactionByEmail();
     }
 }
