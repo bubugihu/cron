@@ -27,10 +27,6 @@ class Cron extends Entity
             $transactions = $this->gmail_api->getTransaction($unread_mails);
             $list_entities = $this->model_transaction->newEntities($transactions);
             $this->model_transaction->saveMany($list_entities);
-            if(!empty($list_entities))
-            {
-                $this->gmail_api->markRead();
-            }
             $connection->commit();
             Log::debug("get " . count($list_entities) . " mails");
         }catch (\Exception $e)
