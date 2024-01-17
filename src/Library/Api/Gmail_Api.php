@@ -8,14 +8,12 @@ use Cake\Log\Log;
 
 class Gmail_Api
 {
-    const URL_GET_MAIL = "https://script.google.com/macros/s/AKfycbzNjTOfWl8YkIOv2S10MNGHigf3RGraM17rEwSyApmeugHNVcxLdDM4F87-nUsdWCGUwQ/exec";
+    const URL_GET_MAIL = "https://script.google.com/macros/s/AKfycbyOlNBAYTAQlA8ITz04zldskD-u3an1ioW_GFIxyWPdu-_6zXF4EN39QB46X8ntIv7R9A/exec";
     const URL_MARK_READ = "https://script.google.com/macros/s/AKfycbwjiSpTSS3C-7YpGVXlqgPJsgdQmLcxJMek4pmdP1V0qrd9XE-SyOJGMOzno0TiZzAH/exec";
     public function getMailUnread()
     {
-        $date = new Date();
-        $today_format = $date->format("Y/m/d");
         $data = [
-            'search' => "is:unread from:mailalert@acb.com.vn after:$today_format"
+            'search' => "is:unread from:mailalert@acb.com.vn"
         ];
         Log::debug($data['search']);
         $ch = curl_init(self::URL_GET_MAIL);
@@ -24,17 +22,14 @@ class Gmail_Api
         curl_setopt($ch, CURLOPT_POSTFIELDS , $data);
         $response = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        curl_close($ch);
         Log::debug('HTTP code getMailUnread: ' . $httpcode);
         return json_decode($response, true);
     }
 
     public function markRead()
     {
-        $date = new Date();
-        $today_format = $date->format("Y/m/d");
         $data = [
-            'search' => "is:unread from:mailalert@acb.com.vn after:$today_format"
+            'search' => "is:unread from:mailalert@acb.com.vn"
         ];
         $ch = curl_init(self::URL_MARK_READ);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
