@@ -4,6 +4,7 @@ namespace App\Library\Api;
 
 use Cake\Chronos\Date;
 use Cake\I18n\FrozenTime;
+use Cake\Log\Log;
 
 class Gmail_Api
 {
@@ -16,11 +17,15 @@ class Gmail_Api
         $data = [
             'search' => "is:unread from:mailalert@acb.com.vn after:$today_format"
         ];
+        Log::debug($data['search']);
         $ch = curl_init(self::URL_GET_MAIL);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS , $data);
         $response = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        curl_close($ch);
+        Log::debug('HTTP code getMailUnread: ' . $httpcode);
         return json_decode($response, true);
     }
 
@@ -36,6 +41,9 @@ class Gmail_Api
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS , $data);
         $response = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        curl_close($ch);
+        Log::debug('HTTP code markRead: ' . $httpcode);
         return json_decode($response, true);
     }
 
