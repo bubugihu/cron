@@ -8,12 +8,11 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Cake\Log\Log;
 
 /**
- * SaveTransaction command.
+ * BackUpDatabase command.
  */
-class SaveTransactionCommand extends Command
+class BackUpDatabaseCommand extends Command
 {
     /**
      * Hook method for defining this command's option parser.
@@ -39,7 +38,7 @@ class SaveTransactionCommand extends Command
     public function execute(Arguments $args, ConsoleIo $io)
     {
         $cron = new Cron();
-        $cron->saveTransactionByEmail();
-        $io->out('Save completed.');
+        $cron->backUpDatabase();
+        $io->out('Database backup completed.');
     }
 }

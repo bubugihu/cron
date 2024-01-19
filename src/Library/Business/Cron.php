@@ -35,4 +35,27 @@ class Cron extends Entity
             $connection->rollback();
         }
     }
+
+    public function backUpDatabase(){
+        // Đường dẫn đến lệnh mysqldump (đối với MySQL)
+        $mysqldumpPath = env('DB_PATH','/usr/bin/mysqldump');
+        // Thông tin kết nối cơ sở dữ liệu
+        $host = env('DB_HOST','/usr/bin/mysqldump');
+        $username = env('DB_USERNAME','/usr/bin/mysqldump');
+        $password = env('DB_PASSWORD','/usr/bin/mysqldump');
+        $database = env('DB_DATABASE','/usr/bin/mysqldump');;
+
+        if(!is_dir(WWW_ROOT . "backup"))
+        {
+            mkdir(WWW_ROOT . "backup");
+        }
+        // Tên file sao lưu
+        $backupFile = WWW_ROOT . "backup" . DS .'backup_' . date('Y-m-d_H-i-s') . '.sql';
+
+        // Tạo lệnh mysqldump
+        $command = "$mysqldumpPath -h $host -u $username --password=$password $database > $backupFile";
+
+        // Thực hiện lệnh
+        exec($command);
+    }
 }
