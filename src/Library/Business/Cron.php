@@ -15,13 +15,14 @@ class Cron extends Entity
     {
         parent::__construct();
         $this->model_transaction= $this->_getProvider("Transaction");
+        $this->model_product= $this->_getProvider("Product");
         $this->gmail_api= new Gmail_Api();
     }
 
     public function saveTransactionByEmail()
     {
+        $connection = ConnectionManager::get('default');
         try{
-            $connection = ConnectionManager::get('default');
             $connection->begin();
             $unread_mails = $this->gmail_api->getMailUnread();
             $transactions = $this->gmail_api->getTransaction($unread_mails);
@@ -29,33 +30,54 @@ class Cron extends Entity
             $this->model_transaction->saveMany($list_entities);
             $connection->commit();
             Log::debug("get " . count($list_entities) . " mails");
+            return true;
         }catch (\Exception $e)
         {
             Log::error($e->getMessage());
             $connection->rollback();
+            return false;
         }
     }
 
     public function backUpDatabase(){
-        // Đường dẫn đến lệnh mysqldump (đối với MySQL)
-        $mysqldumpPath = env('DB_PATH','/usr/bin/mysqldump');
-        // Thông tin kết nối cơ sở dữ liệu
-        $host = env('DB_HOST','/usr/bin/mysqldump');
-        $username = env('DB_USERNAME','/usr/bin/mysqldump');
-        $password = env('DB_PASSWORD','/usr/bin/mysqldump');
-        $database = env('DB_DATABASE','/usr/bin/mysqldump');;
+        try{
+            $mysqldumpPath = env('DB_PATH','/usr/bin/mysqldump');
 
-        if(!is_dir(WWW_ROOT . "backup"))
+            $host = env('DB_HOST','/usr/bin/mysqldump');
+            $username = env('DB_USERNAME','/usr/bin/mysqldump');
+            $password = env('DB_PASSWORD','/usr/bin/mysqldump');
+            $database = env('DB_DATABASE','/usr/bin/mysqldump');;
+
+            if(!is_dir(WWW_ROOT . "backup"))
+            {
+                mkdir(WWW_ROOT . "backup");
+            }
+            $backupFile = WWW_ROOT . "backup" . DS .'backup_' . date('Y-m-d_H-i-s') . '.sql';
+
+            $command = "$mysqldumpPath -h $host -u $username --password=$password $database > $backupFile";
+
+            exec($command);
+            return true;
+        }catch (\Exception $e)
         {
-            mkdir(WWW_ROOT . "backup");
+            Log::error($e->getMessage());
+            return false;
         }
-        // Tên file sao lưu
-        $backupFile = WWW_ROOT . "backup" . DS .'backup_' . date('Y-m-d_H-i-s') . '.sql';
+    }
 
-        // Tạo lệnh mysqldump
-        $command = "$mysqldumpPath -h $host -u $username --password=$password $database > $backupFile";
-
-        // Thực hiện lệnh
-        exec($command);
+    public function updateInventory()
+    {
+        $connection = ConnectionManager::get('default');
+        try{
+            $sql = "UPDATE product SET `total_qty` = `p_qty` - `q_qty`";
+            $connection->execute(
+                $sql,
+            );
+            return true;
+        }catch (\Exception $e)
+        {
+            Log::error($e->getMessage());
+            return false;
+        }
     }
 }

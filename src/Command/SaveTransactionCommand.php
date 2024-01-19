@@ -39,7 +39,12 @@ class SaveTransactionCommand extends Command
     public function execute(Arguments $args, ConsoleIo $io)
     {
         $cron = new Cron();
-        $cron->saveTransactionByEmail();
-        $io->out('Save completed.');
+        $result = $cron->saveTransactionByEmail();
+        if($result)
+        {
+            $io->out('Save completed.');
+        }else{
+            $io->out('Save failed.');
+        }
     }
 }

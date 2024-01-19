@@ -10,9 +10,9 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 
 /**
- * BackUpDatabase command.
+ * UpdateInventory command.
  */
-class BackUpDatabaseCommand extends Command
+class UpdateInventoryCommand extends Command
 {
     /**
      * Hook method for defining this command's option parser.
@@ -38,12 +38,12 @@ class BackUpDatabaseCommand extends Command
     public function execute(Arguments $args, ConsoleIo $io)
     {
         $cron = new Cron();
-        $result = $cron->backUpDatabase();
+        $result = $cron->updateInventory();
         if($result)
         {
-            $io->out('Database backup completed.');
+            $io->out('Update completed.');
         }else{
-            $io->out('Database backup failed.');
+            $io->out('Update failed.');
         }
     }
 }
