@@ -150,28 +150,7 @@ class Cron extends Entity
                 },
             ])->all()->toList();
 
-            // update inventory
-            $list_entities = $this->model_quoting->selectList(['order_code IN ' => $list_order_waiting, 'status' => 0]);
-
-            $list_set_product = $this->model_set_product->find('list', [
-                'fields' => ['id', 'code','del_flag'],
-                'conditions' => ['SetProduct.del_flag' => UNDEL],
-                'keyField' => 'code',
-                'valueField' => function($value) {
-                    return $value;
-                },
-            ])->contain(['SetProductDetail'])->toArray();
-
-            $list_product = $this->model_product->find('list', [
-                'fields' => ['id', 'code','del_flag'],
-                'conditions' => ['Product.del_flag' => UNDEL],
-                'keyField' => 'id',
-                'valueField' => function($value) {
-                    return $value['code'];
-                },
-            ])->toArray();
-
-            $this->updateQuotingInventory($list_entities, $list_product, $list_set_product);
+            $this->updateQuotingInventory($list_order_waiting);
 
             $setFields = [
                 'status'  => 2 // status done
@@ -196,8 +175,29 @@ class Cron extends Entity
         }
     }
 
-    public function updateQuotingInventory($list_entities, $list_product, $list_set_product)
+    public function updateQuotingInventory($list_order_waiting)
     {
+
+        // update inventory
+        $list_entities = $this->model_quoting->selectList(['order_code IN ' => $list_order_waiting, 'status' => 0]);
+
+        $list_set_product = $this->model_set_product->find('list', [
+            'fields' => ['id', 'code','del_flag'],
+            'conditions' => ['SetProduct.del_flag' => UNDEL],
+            'keyField' => 'code',
+            'valueField' => function($value) {
+                return $value;
+            },
+        ])->contain(['SetProductDetail'])->toArray();
+
+        $list_product = $this->model_product->find('list', [
+            'fields' => ['id', 'code','del_flag'],
+            'conditions' => ['Product.del_flag' => UNDEL],
+            'keyField' => 'id',
+            'valueField' => function($value) {
+                return $value['code'];
+            },
+        ])->toArray();
 
         $connection = ConnectionManager::get('default');
         foreach($list_entities as $value)
