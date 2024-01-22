@@ -126,6 +126,10 @@ class Cron extends Entity
             $list_entities_purchasing = $this->model_purchasing->newEntities($list_purchasing);
             $this->model_purchasing->saveMany($list_entities_purchasing);
 
+            // update p_price set product
+//            $condition = [];
+//            $contain = ['SetProductDetail.Product'];
+//            $list_set_product = $this->model_set_product->selectList();
             $connection->commit();
             return true;
         }catch (\Exception $e)
@@ -241,4 +245,31 @@ class Cron extends Entity
 
         }//endforeach
     }
+
+    public function updatePPriceQuoting()
+    {
+        try{
+            $condition = [];
+            $contain = ['SetProductDetail.Product'];
+            $list_set_product = $this->model_set_product->selectList($condition, $contain);
+            foreach($list_set_product as $key => $set)
+            {
+                $p_price = 0;
+                foreach($set->set_product_detail as $k => $set_detail)
+                {
+                    if(!empty($set_detail->product->p_price))
+                        $p_price += $set_detail->product->p_price;
+                }
+
+                $set->p_price = $p_price;
+                $this->model_set_product->save($set);
+            }
+            return true;
+        }catch (\Exception $e)
+        {
+            Log::error($e->getMessage());
+            return false;
+        }
+    }
+
 }
