@@ -252,6 +252,7 @@ class Cron extends Entity
     public function updatePPriceQuoting()
     {
         try{
+            // update p price set product
             $condition = [];
             $contain = ['SetProductDetail.Product'];
             $list_set_product = $this->model_set_product->selectList($condition, $contain);
@@ -266,6 +267,34 @@ class Cron extends Entity
 
                 $set->p_price = $p_price;
                 $this->model_set_product->save($set);
+            }
+
+            // update p price quoting
+            $condition = [];
+            $contain = ['Product'];
+            $list_quoting = $this->model_quoting->selectList($condition, $contain);
+
+            $list_set_product = $this->model_set_product->find('list', [
+                'fields' => ['id', 'code','del_flag', 'p_price'],
+                'conditions' => ['SetProduct.del_flag' => UNDEL],
+                'keyField' => 'code',
+                'valueField' => function($value) {
+                    return $value;
+                },
+            ])->toArray();
+
+            foreach($list_quoting as $quoting)
+            {
+                if(!empty($quoting->product->p_price))
+                {
+                    $quoting->p_price = $quoting->product->p_price;
+                    $this->model_quoting->save($quoting);
+                }
+                if(!empty($list_set_product[$quoting->code]))
+                {
+                    $quoting->p_price = $list_set_product[$quoting->code]->p_price;
+                    $this->model_quoting->save($quoting);
+                }
             }
             return true;
         }catch (\Exception $e)

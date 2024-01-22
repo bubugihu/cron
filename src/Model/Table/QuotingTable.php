@@ -9,7 +9,7 @@ class QuotingTable extends AppTable
     public function initialize(array $config): void
     {
 
-        $this->condition = ['del_flag' => UNDEL];
+        $this->condition = ['Quoting.del_flag' => UNDEL];
         $this->hasOne("Product",[
             'foreignKey' => 'code',
             'bindingKey' => 'code'
