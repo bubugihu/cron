@@ -88,7 +88,7 @@ class Cron extends Entity
                 'valueField' => function($value) {
                     return $value;
                 },
-            ])->toList();
+            ])->all()->toList();
 
             $list_product_total_empty = $this->model_product->find('list', [
                 'fields' => ['id', 'total_qty', 'code', 'del_flag'],
@@ -154,7 +154,10 @@ class Cron extends Entity
                 },
             ])->all()->toList();
 
-            $this->updateQuotingInventory($list_order_waiting);
+            if(count($list_order_waiting) > 0)
+            {
+                $this->updateQuotingInventory($list_order_waiting);
+            }
 
             $setFields = [
                 'status'  => 2 // status done
