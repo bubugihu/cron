@@ -21,6 +21,7 @@ class Cron extends Entity
         $this->model_quoting = $this->_getProvider("Quoting");
         $this->model_order = $this->_getProvider("Orders");
         $this->model_set_product = $this->_getProvider("SetProduct");
+        $this->model_cost_inventory = $this->_getProvider("CostInventory");
         $this->gmail_api= new Gmail_Api();
     }
 
@@ -75,10 +76,10 @@ class Cron extends Entity
         $connection = ConnectionManager::get('default');
         try{
             $connection->begin();
-            $sql = "UPDATE product SET `total_qty` = `p_qty` - `q_qty`";
-            $connection->execute(
-                $sql,
-            );
+//            $sql = "UPDATE product SET `total_qty` = `p_qty` - `q_qty`";
+//            $connection->execute(
+//                $sql,
+//            );
             // check pre purchasing
             //get all pre purchasing
             $list_pre_purchasing = $this->model_prepurchasing->find('list', [
@@ -105,7 +106,9 @@ class Cron extends Entity
                 if(in_array($value->code, array_keys($list_product_total_empty)))
                 {
                     //insert to purchasing
-                    $list_purchasing[] = $value->toArray();
+                    $pur_value =  $value->toArray();
+                    unset($pur_value['id']);
+                    $list_purchasing[] = $pur_value;
                     $value->del_flag = DELETE;
 
                     //delete pre purchasing
@@ -304,4 +307,39 @@ class Cron extends Entity
         }
     }
 
+    public function costInventory()
+    {
+        try{
+            $list_product = $this->model_product->find()
+                ->toArray();
+            $cost= 0;
+            foreach($list_product as $key => $product)
+            {
+                $cost += floatval($product->total_qty * $product->p_price);
+            }
+            $list_pre = $this->model_prepurchasing->find()
+                ->where(['del_flag' => UNDEL])
+                ->toArray();
+            foreach($list_pre as $key => $value)
+            {
+                $cost += floatval($value->quantity * $value->price);
+            }
+
+            $today = FrozenTime::now();
+            $month = intval($today->format('n'));
+            $year = intval($today->format('Y'));
+            $params = [
+                'month'   =>  $month,
+                'year'    =>  $year,
+                'value'   =>  $cost
+            ];
+            $new_entity = $this->model_cost_inventory->newEntity($params);
+            $this->model_cost_inventory->save($new_entity);
+            return true;
+        }catch (\Exception $e)
+        {
+            Log::error($e->getMessage());
+            return false;
+        }
+    }
 }
