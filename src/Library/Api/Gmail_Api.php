@@ -8,7 +8,7 @@ use Cake\Log\Log;
 
 class Gmail_Api
 {
-    const URL_GET_MAIL = "https://script.google.com/macros/s/AKfycbyEYAfQQYstvRF8PLVSKVszh1Z6HInziTm8XtZUrkxYbWYoMRhi34w_XYRloYcrNuasyg/exec";
+    const URL_GET_MAIL = "https://script.google.com/macros/s/AKfycbwyLe7JMFPk_TPefL4vK92VTWFSJz2GSlZcYuaLFJJodzYoP8YC05oso6GllO6gAQU1RQ/exec";
     const URL_MARK_READ = "https://script.google.com/macros/s/AKfycbwjiSpTSS3C-7YpGVXlqgPJsgdQmLcxJMek4pmdP1V0qrd9XE-SyOJGMOzno0TiZzAH/exec";
     public function getMailUnread()
     {
